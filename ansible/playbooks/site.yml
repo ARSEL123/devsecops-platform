@@ -1,0 +1,8 @@
+---
+- name: Configuration complète du serveur DevSecOps
+  hosts: all
+  become: true
+  roles:
+    - role: ../roles/base
+    - role: ../roles/security
+    - role: ../roles/docker

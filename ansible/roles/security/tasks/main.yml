@@ -1,0 +1,47 @@
+---
+- name: Installation de UFW (pare-feu)
+  apt:
+    name: ufw
+    state: present
+
+- name: Refuser toutes les connexions entrantes par défaut
+  ufw:
+    default: deny
+    direction: incoming
+
+- name: Autoriser SSH (port 22)
+  ufw:
+    rule: allow
+    port: '22'
+    proto: tcp
+
+- name: Autoriser HTTP (port 80)
+  ufw:
+    rule: allow
+    port: '80'
+    proto: tcp
+
+- name: Autoriser HTTPS (port 443)
+  ufw:
+    rule: allow
+    port: '443'
+    proto: tcp
+
+- name: Activer UFW
+  ufw:
+    state: enabled
+
+- name: Désactiver l'authentification par mot de passe SSH
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^#?PasswordAuthentication'
+    line: 'PasswordAuthentication no'
+    backup: yes
+  notify: restart ssh
+
+- name: Désactiver le login root SSH
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^#?PermitRootLogin'
+    line: 'PermitRootLogin no'
+  notify: restart ssh

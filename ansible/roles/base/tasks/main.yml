@@ -1,0 +1,41 @@
+---
+- name: Mise à jour du cache apt
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+
+- name: Mise à jour de tous les paquets
+  apt:
+    upgrade: dist
+    autoremove: yes
+
+- name: Installation des paquets essentiels
+  apt:
+    name:
+      - curl
+      - wget
+      - git
+      - vim
+      - htop
+      - net-tools
+      - unzip
+      - ca-certificates
+      - gnupg
+      - lsb-release
+      - python3-pip
+    state: present
+
+- name: Création de l'utilisateur deploy
+  user:
+    name: deploy
+    groups: sudo
+    shell: /bin/bash
+    create_home: yes
+    state: present
+
+- name: Autoriser deploy à utiliser sudo sans mot de passe
+  lineinfile:
+    path: /etc/sudoers.d/deploy
+    line: 'deploy ALL=(ALL) NOPASSWD:ALL'
+    create: yes
+    mode: '0440'
