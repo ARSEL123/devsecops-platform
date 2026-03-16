@@ -1,5 +1,5 @@
 cat > ~/devsecops-platform/.github/workflows/ci.yml << 'EOF'
-name: CI/CD Pipeline — DevSecOps Arsel
+name: CI/CD Pipeline DevSecOps Arsel
 
 on:
   push:
