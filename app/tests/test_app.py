@@ -10,8 +10,7 @@ def client():
 def test_home(client):
     response = client.get('/')
     assert response.status_code == 200
-    data = response.get_json()
-    assert data['status'] == 'running'
+    assert b'DevSecOps' in response.data
 
 def test_health(client):
     response = client.get('/health')
@@ -24,3 +23,9 @@ def test_info(client):
     assert response.status_code == 200
     data = response.get_json()
     assert 'Flask' in data['stack']
+
+def test_api(client):
+    response = client.get('/api')
+    assert response.status_code == 200
+    data = response.get_json()
+    assert data['status'] == 'running'
