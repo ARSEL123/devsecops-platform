@@ -1,4 +1,3 @@
-cat > ~/devsecops-platform/.github/workflows/ci.yml << 'EOF'
 name: CI/CD Pipeline DevSecOps Arsel
 
 on:
@@ -12,12 +11,9 @@ env:
   IMAGE_NAME: devsecops-arsel
 
 jobs:
-
-  # ─── JOB 1 : BUILD + TESTS ───────────────────────────────────────
   build-and-test:
-    name: Build & Test
+    name: Build and Test
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout du code
         uses: actions/checkout@v4
@@ -27,50 +23,42 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Installation des dépendances
+      - name: Installation des dependances
         run: |
           cd app
           pip install -r requirements.txt
 
-      - name: Lancement des tests unitaires
+      - name: Tests unitaires
         run: |
           cd app
           python -m pytest tests/ -v --tb=short
 
-      - name: Build de l'image Docker
-        run: |
-          docker build -t $IMAGE_NAME:${{ github.sha }} ./app
+      - name: Build image Docker
+        run: docker build -t $IMAGE_NAME:${{ github.sha }} ./app
 
-      - name: Sauvegarde de l'image pour le job suivant
-        run: |
-          docker save $IMAGE_NAME:${{ github.sha }} | gzip > image.tar.gz
+      - name: Sauvegarde image
+        run: docker save $IMAGE_NAME:${{ github.sha }} | gzip > image.tar.gz
 
-      - name: Upload de l'image comme artifact
+      - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
           name: docker-image
           path: image.tar.gz
 
-  # ─── JOB 2 : SCAN SÉCURITÉ TRIVY ─────────────────────────────────
   security-scan:
-    name: Security Scan (Trivy)
+    name: Security Scan Trivy
     runs-on: ubuntu-latest
     needs: build-and-test
-
     steps:
-      - name: Checkout du code
-        uses: actions/checkout@v4
-
-      - name: Download de l'image
+      - name: Download image
         uses: actions/download-artifact@v3
         with:
           name: docker-image
 
-      - name: Chargement de l'image Docker
-        run: |
-          docker load < image.tar.gz
+      - name: Chargement image
+        run: docker load < image.tar.gz
 
-      - name: Scan Trivy — vulnérabilités critiques
+      - name: Scan Trivy
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: ${{ env.IMAGE_NAME }}:${{ github.sha }}
@@ -78,33 +66,18 @@ jobs:
           exit-code: '0'
           severity: CRITICAL,HIGH
 
-      - name: Scan Trivy — rapport SARIF
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: ${{ env.IMAGE_NAME }}:${{ github.sha }}
-          format: sarif
-          output: trivy-results.sarif
-
-      - name: Upload du rapport de sécurité
-        uses: actions/upload-artifact@v3
-        with:
-          name: trivy-report
-          path: trivy-results.sarif
-
-  # ─── JOB 3 : PUSH SUR ACR ─────────────────────────────────────────
   push-to-acr:
     name: Push to ACR
     runs-on: ubuntu-latest
     needs: security-scan
     if: github.ref == 'refs/heads/main'
-
     steps:
-      - name: Download de l'image
+      - name: Download image
         uses: actions/download-artifact@v3
         with:
           name: docker-image
 
-      - name: Chargement de l'image Docker
+      - name: Chargement image
         run: docker load < image.tar.gz
 
       - name: Login Azure
@@ -115,41 +88,37 @@ jobs:
       - name: Login ACR
         run: az acr login --name acrdevsecopsarsel
 
-      - name: Tag et Push de l'image
+      - name: Tag et Push
         run: |
           docker tag $IMAGE_NAME:${{ github.sha }} $ACR_LOGIN_SERVER/$IMAGE_NAME:${{ github.sha }}
           docker tag $IMAGE_NAME:${{ github.sha }} $ACR_LOGIN_SERVER/$IMAGE_NAME:latest
           docker push $ACR_LOGIN_SERVER/$IMAGE_NAME:${{ github.sha }}
           docker push $ACR_LOGIN_SERVER/$IMAGE_NAME:latest
 
-  # ─── JOB 4 : DÉPLOIEMENT SUR AKS ─────────────────────────────────
   deploy-to-aks:
     name: Deploy to AKS
     runs-on: ubuntu-latest
     needs: push-to-acr
     if: github.ref == 'refs/heads/main'
-
     steps:
-      - name: Checkout du code
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Configuration de kubectl
+      - name: Configuration kubectl
         run: |
           mkdir -p ~/.kube
           echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > ~/.kube/config
           chmod 600 ~/.kube/config
 
-      - name: Mise à jour de l'image dans le Deployment
+      - name: Deploy
         run: |
           kubectl set image deployment/devsecops-app \
             devsecops-app=$ACR_LOGIN_SERVER/$IMAGE_NAME:${{ github.sha }}
 
-      - name: Attente du rollout
-        run: |
-          kubectl rollout status deployment/devsecops-app --timeout=120s
+      - name: Rollout status
+        run: kubectl rollout status deployment/devsecops-app --timeout=120s
 
-      - name: Vérification finale
+      - name: Verification
         run: |
           kubectl get pods
           kubectl get service devsecops-app-service
-EOF
