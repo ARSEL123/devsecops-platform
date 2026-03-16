@@ -137,3 +137,50 @@ resource "azurerm_storage_container" "main" {
 
   depends_on = [azurerm_storage_account.main]
 }
+
+# --- Azure Container Registry ---
+resource "azurerm_container_registry" "main" {
+  name                = "acrdevsecopsarsel"
+  resource_group_name = azurerm_resource_group.main.name
+  location            = azurerm_resource_group.main.location
+  sku                 = "Basic"
+  admin_enabled       = true
+
+  tags = {
+    project     = var.project_name
+    environment = "dev"
+    managed_by  = "terraform"
+  }
+}
+
+# --- AKS Cluster ---
+resource "azurerm_kubernetes_cluster" "main" {
+  name                = "aks-${var.project_name}"
+  location            = azurerm_resource_group.main.location
+  resource_group_name = azurerm_resource_group.main.name
+  dns_prefix          = "aks-${var.project_name}"
+
+  default_node_pool {
+    name       = "default"
+    node_count = 1
+    vm_size    = "Standard_B2als_v2"
+  }
+
+  identity {
+    type = "SystemAssigned"
+  }
+
+  tags = {
+    project     = var.project_name
+    environment = "dev"
+    managed_by  = "terraform"
+  }
+}
+
+# --- Autoriser AKS à puller depuis ACR ---
+resource "azurerm_role_assignment" "aks_acr" {
+  principal_id                     = azurerm_kubernetes_cluster.main.kubelet_identity[0].object_id
+  role_definition_name             = "AcrPull"
+  scope                            = azurerm_container_registry.main.id
+  skip_service_principal_aad_check = true
+}
