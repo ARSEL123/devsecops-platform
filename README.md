@@ -14,8 +14,8 @@
 <br/>
 
 > **Stayer Arsel DIFFO SOUOP**  
-> Master of Engineering — Systèmes, Réseaux & Cloud  
-> SUPINFO Paris · 2025/2026
+> Conception et déploiement d'une infrastructure DevSecOps complète sur Microsoft Azure 
+
 
 <br/>
 
