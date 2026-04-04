@@ -106,9 +106,8 @@ jobs:
       - name: Configuration kubectl
         run: |
           mkdir -p ~/.kube
-          echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > ~/.kube/config
+          echo "${{ secrets.KUBE_CONFIG }}" > ~/.kube/config
           chmod 600 ~/.kube/config
-
       - name: Deploy
         run: |
           kubectl set image deployment/devsecops-app \
