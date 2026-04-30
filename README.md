@@ -19,9 +19,7 @@
 
 
 <br/>
-###  https://arsel123.github.io/
-### 🌐 Portfolio live → [http://20.87.59.67](http://20.87.59.67)
-### 🚀 App DevSecOps → [http://20.87.90.91](http://20.87.90.91)
+###                      https://arsel123.github.io/
 
 </div>
 
