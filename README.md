@@ -101,7 +101,7 @@ Il démontre la maîtrise de l'ensemble du cycle de vie d'une infrastructure clo
 |---|---|---|
 | **Phase 1** | Infrastructure as Code — Terraform + Ansible | ✅ **Terminée** |
 | **Phase 2** | CI/CD + Docker + Kubernetes | ✅ **Terminée** |
-| **Phase 3** | Supervision — Prometheus + Grafana + ELK | 🔄 En cours |
+| **Phase 3** | Supervision — Prometheus + Grafana + ELK | ✅ **Terminée** |
 | **Phase 4** | Haute disponibilité + Documentation finale | ⏳ À venir |
 
 ---
