@@ -19,7 +19,7 @@
 
 <br/>
 
-### 🌐 [Voir l'application en live → http://4.253.10.14](http://4.253.10.14)
+### 🌐 [Voir l'application en live → http://20.87.90.91](http://20.87.90.91)
 
 </div>
 
@@ -61,7 +61,7 @@ Il démontre la maîtrise de l'ensemble du cycle de vie d'une infrastructure clo
 | Container Registry (ACR) | acrdevsecopsarsel | ✅ Actif |
 | Virtual Network | vnet-devsecops-arsel | ✅ Actif |
 | Storage Account | stdevsecopsarsel001 | ✅ Actif |
-| IP Publique | 4.253.10.14 | ✅ Live |
+| IP Publique | 20.87.90.91 | ✅ Live |
 
 ---
 
@@ -126,7 +126,7 @@ kubectl apply -f kubernetes/services/app-service.yml
 
 # 5. Vérifier
 kubectl get pods
-curl http://4.253.10.14
+curl http://20.87.90.91
 ```
 
 ---
